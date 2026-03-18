@@ -1,397 +1,756 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Painel de Acesso Rápido - Acelera Obra</title>
+  <title>Painel Acelera Obra — Carlos Amaral</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #13161e;
+      --surface-2: #1a1d28;
+      --surface-3: #21253a;
+      --border: rgba(255,255,255,0.07);
+      --text: #e8eaf0;
+      --text-muted: #6b7280;
+      --text-subtle: #9ca3af;
+
+      --blue: #3b82f6;
+      --blue-dim: rgba(59,130,246,0.12);
+      --blue-glow: rgba(59,130,246,0.25);
+
+      --green: #10b981;
+      --green-dim: rgba(16,185,129,0.12);
+      --green-glow: rgba(16,185,129,0.25);
+
+      --orange: #f59e0b;
+      --orange-dim: rgba(245,158,11,0.12);
+      --orange-glow: rgba(245,158,11,0.25);
+
+      --purple: #a855f7;
+      --purple-dim: rgba(168,85,247,0.12);
+      --purple-glow: rgba(168,85,247,0.25);
+
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    [data-theme="light"] {
+      --bg: #f0f2f8;
+      --surface: #ffffff;
+      --surface-2: #f7f8fc;
+      --surface-3: #eef0f7;
+      --border: rgba(0,0,0,0.08);
+      --text: #1a1d28;
+      --text-muted: #9ca3af;
+      --text-subtle: #6b7280;
+
+      --blue-dim: rgba(59,130,246,0.08);
+      --green-dim: rgba(16,185,129,0.08);
+      --orange-dim: rgba(245,158,11,0.08);
+      --purple-dim: rgba(168,85,247,0.08);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f0f2f5;
-      margin: 0;
-      padding: 20px;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0 0 60px;
+      transition: background 0.3s, color 0.3s;
     }
 
-    h1 {
-      text-align: center;
-      margin-bottom: 30px;
-      color: #2d3748;
-    }
-
-    .kanban-board {
+    /* ─── HEADER ─────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 0 32px;
+      height: 64px;
       display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      justify-content: center;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
     }
 
-    .kanban-column {
-      border-radius: 10px;
-      width: 320px;
-      padding: 20px;
-      background-color: #ffffff;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .kanban-column h2 {
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--blue);
+      box-shadow: 0 0 10px var(--blue);
+      animation: pulse 2.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+
+    .brand-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
       font-size: 18px;
-      margin-bottom: 15px;
-      padding: 10px;
-      border-radius: 8px;
-      color: #fff;
+      letter-spacing: -0.5px;
+      color: var(--text);
     }
 
-    .ferramentas h2 {
-      background: linear-gradient(to right, #4299e1, #3182ce);
+    .brand-name span {
+      color: var(--blue);
     }
 
-    .relatorios h2 {
-      background: linear-gradient(to right, #48bb78, #38a169);
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
-    .pagamentos h2 {
-      background: linear-gradient(to right, #ed8936, #dd6b20);
+    .user-badge {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-subtle);
+      padding: 5px 12px;
+      background: var(--surface-3);
+      border-radius: 100px;
+      border: 1px solid var(--border);
     }
 
-    .contratos h2 {
-      background: linear-gradient(to right, #a830cd, #a830cd);
-    }
-
-    .card {
-      background-color: #f7fafc;
-      border-left: 5px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 10px;
-      transition: 0.2s;
+    .theme-toggle {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-subtle);
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all 0.2s;
     }
+    .theme-toggle:hover {
+      background: var(--surface-3);
+      color: var(--text);
+      border-color: var(--blue);
+    }
+
+    /* ─── MAIN GRID ───────────────────────────────── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px 0;
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+      .board { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 640px) {
+      .board { grid-template-columns: 1fr; }
+      header { padding: 0 16px; }
+      main { padding: 20px 12px 0; }
+    }
+
+    /* ─── COLUMN ──────────────────────────────────── */
+    .col {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .col-header {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .col-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .col-ferramentas .col-icon  { background: var(--blue-dim); }
+    .col-relatorios .col-icon   { background: var(--green-dim); }
+    .col-pagamentos .col-icon   { background: var(--orange-dim); }
+    .col-contratos  .col-icon   { background: var(--purple-dim); }
+
+    .col-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
+
+    .col-ferramentas .col-title  { color: var(--blue); }
+    .col-relatorios .col-title   { color: var(--green); }
+    .col-pagamentos .col-title   { color: var(--orange); }
+    .col-contratos  .col-title   { color: var(--purple); }
+
+    .col-count {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: var(--surface-2);
+      padding: 2px 8px;
+      border-radius: 100px;
+      border: 1px solid var(--border);
+    }
+
+    .col-body {
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* ─── CARD ────────────────────────────────────── */
+    .card {
+      display: block;
+      text-decoration: none;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: background 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 3px 0 0 3px;
+      transition: opacity 0.18s;
+      opacity: 0.5;
+    }
+
+    .col-ferramentas .card::before  { background: var(--blue); }
+    .col-relatorios .card::before   { background: var(--green); }
+    .col-pagamentos .card::before   { background: var(--orange); }
+    .col-contratos  .card::before   { background: var(--purple); }
 
     .card:hover {
-      background-color: #ebf4ff;
-      transform: scale(1.02);
+      background: var(--surface-3);
+      transform: translateY(-1px);
     }
 
+    .col-ferramentas .card:hover  { border-color: var(--blue); box-shadow: 0 4px 20px var(--blue-glow); }
+    .col-ferramentas .card:hover::before { opacity: 1; }
+    .col-relatorios  .card:hover  { border-color: var(--green); box-shadow: 0 4px 20px var(--green-glow); }
+    .col-relatorios  .card:hover::before { opacity: 1; }
+    .col-pagamentos  .card:hover  { border-color: var(--orange); box-shadow: 0 4px 20px var(--orange-glow); }
+    .col-pagamentos  .card:hover::before { opacity: 1; }
+    .col-contratos   .card:hover  { border-color: var(--purple); box-shadow: 0 4px 20px var(--purple-glow); }
+    .col-contratos   .card:hover::before { opacity: 1; }
+
     .card-title {
-      font-weight: bold;
-      font-size: 16px;
-      margin-bottom: 4px;
-      color: #2d3748;
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 13.5px;
+      color: var(--text);
+      margin-bottom: 3px;
+      line-height: 1.3;
     }
 
     .card-info {
-      font-size: 14px;
-      color: #4a5568;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
     }
 
-    a {
-      text-decoration: none;
+    .card-info + .card-info {
+      margin-top: 1px;
     }
 
+    .card-copy-hint {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.7;
+    }
+
+    /* ─── TOAST ───────────────────────────────────── */
     #toast {
       position: fixed;
-      bottom: 30px;
+      bottom: 28px;
       left: 50%;
-      transform: translateX(-50%);
-      background: #38a169;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--green);
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      pointer-events: none;
+      z-index: 9999;
+      white-space: nowrap;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── MODAL ───────────────────────────────────── */
+    .modal-overlay {
       display: none;
-      font-weight: bold;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-window {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      width: min(840px, 94vw);
+      height: min(85vh, 720px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+      animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-title-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--blue);
+    }
+
+    .modal-close {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .modal-close:hover {
+      background: var(--surface-3);
+      color: var(--text);
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .modal-body iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ─── STAGGER ANIMATION ───────────────────────── */
+    .col { animation: fadeUp 0.4s ease both; }
+    .col:nth-child(1) { animation-delay: 0.05s; }
+    .col:nth-child(2) { animation-delay: 0.1s; }
+    .col:nth-child(3) { animation-delay: 0.15s; }
+    .col:nth-child(4) { animation-delay: 0.2s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
 
-  <h1>📌 Painel de Acesso Rápido Acelera Obra - Carlos Amaral</h1>
-
-  <div class="kanban-board">
-
-    <!-- Ferramentas -->
-    <div class="kanban-column ferramentas">
-      <h2>📅 Ferramentas</h2>
-
-
-      <a href="https://meu.businessdigital360.com.br/v2/location/gbkhVMNStgwRjHc3NUZY/opportunities/list" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">BD360 CRM</div>
-          <div class="card-info">Acompanhe os leads e oportunidades</div>
-        </div>
-      </a>
-
-      <a href="https://web.whatsapp.com/" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">WhatsApp Web</div>
-          <div class="card-info">Comunicação com leads e clientes</div>
-        </div>
-      </a>
-
-      <a href="https://calendar.google.com/calendar/u/0/r/week" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">Google Agenda</div>
-          <div class="card-info">Agenda semanal de reuniões</div>
-        </div>
-      </a>
-
-      <a href="https://docs.google.com/presentation/d/1SP91Qj3OsemyplTHPjusSB0JUliD_7Zgw6AT9iFVRo4/edit?slide=id.g37064a72edb_0_0#slide=id.g37064a72edb_0_0" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">Apresentação</div>
-          <div class="card-info">Material para lojas de materiais de construção</div>
-        </div>
-      </a>
-
-
-      <a href="https://docs.google.com/presentation/d/1cEdNRIEPDLUo4A-UdtoO9ml-K7ga_eVLYTX2oquPBhY/edit?slide=id.p#slide=id.p" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">Sessão Consultoria</div>
-          <div class="card-info">Apresentação da Consultoria Acelera</div>
-        </div>
-      </a>
-
-      <a href="https://forms.clickup.com/36963815/f/1381f7-13553/42YWKRQ1J7FGV3LNCR" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-        <div class="card-title">Formulário ClickUP</div>
-        <div class="card-info">Formulário para preenchimento de dados</div>
-        </div>
-      </a>
-
-          <a href="https://app.clickup.com/36963815/v/l/sh/36963815" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-        <div class="card-title">ClickUP</div>
-        <div class="card-info">Painel</div>
-        </div>
-      </a>
-
-      <a href="https://doc.clickup.com/36963815/p/h/1381f7-8333/02c02111d7b9b94" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">Playbook Closer</div>
-          <div class="card-info">Manual do Closer</div>
-        </div>
-      </a>
-
-      <a href="https://ia.aceleraobra.com.br/conversas" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">IA Acelera</div>
-          <div class="card-info">Painal da IA de Atendimento</div>
-        </div>
-      </a>
-
-     
-      <div class="card" style="border-left-color: #3182ce;" onclick="copyToClipboard('financeiro@aceleraobra.com.br')">
-        <div class="card-title">Financeiro Acelera Obra</div>
-        <div class="card-info">Chave Pix E-mail</div>
-      </div>    
-
-      <a href="https://doc.clickup.com/36963815/p/h/1381f7-14853/5c67072a29fdc39" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">Calendário Novembro</div>
-          <div class="card-info">Apresentação do Calendário</div>
-        </div>
-      </a>
-
-            <a href="https://docs.google.com/spreadsheets/d/1-eMzfI3PCEcPC-hVKjlqWCrEhcjiFi7CX-xXkg_Fy2o/edit?gid=528233429#gid=528233429" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-          <div class="card-title">PGM Acacio</div>
-          <div class="card-info">Apresentação da PGM</div>
-        </div>
-      </a>
-
-<div class="card" style="border-left-color: #3182ce;" onclick="openTranscriptionPopup()">
-  <div class="card-title">🎙️ Transcritor de Áudio</div>
-  <div class="card-info">Transcreva reuniões ou áudios do sistema</div>
-</div>
-
-       <a href="https://docs.google.com/document/d/18wGuusNhwuT8iRL_eivd74F6EtGCQEP2WAY8X3P0-nM/edit?tab=t.0#heading=h.1np2j5tul8j7" target="_blank">
-        <div class="card" style="border-left-color: #3182ce;">
-        <div class="card-title">Paybook Closer - Consultoria</div>
-        <div class="card-info">Script completo da Apresentação da Consultoria</div>
-        </div>
-      </a>
-
-           
+  <header>
+    <div class="header-brand">
+      <div class="brand-dot"></div>
+      <div class="brand-name">Acelera<span>Obra</span></div>
     </div>
-
-    <!-- Relatórios Diários -->
-    <div class="kanban-column relatorios">
-      <h2>📈 Relatórios Diários</h2>
-
-      <a href="https://docs.google.com/document/u/0/?tgif=d" target="_blank">
-        <div class="card" style="border-left-color: #38a169;">
-          <div class="card-title">Google Docs</div>
-          <div class="card-info">Transcrição de reuniões</div>
-        </div>
-      </a>
-
-      <a href="https://gemini.google.com/gem/73dea6720d32" target="_blank">
-        <div class="card" style="border-left-color: #38a169;">
-          <div class="card-title">Assistente Gemini</div>
-          <div class="card-info">Resumos, propostas e checklists</div>
-        </div>
-      </a>
-
-          <a href="https://docs.google.com/spreadsheets/d/1a0-B6UfHhRCrn3dYy6lGvuFeEOh5zV80GMk816sgWhI/edit?gid=1830719344#gid=1830719344" target="_blank">
-        <div class="card" style="border-left-color: #38a169;">
-          <div class="card-title">Resultados Mensais</div>
-          <div class="card-info">Registro de Resultados Mensais Carlos</div>
-        </div>
-      </a>
-
-       <a href="https://docs.google.com/document/d/1XAfbgVhLLJ-ELWKvIi-shIP7RTx2Eobob5-UmTW_0hc/edit?tab=t.0" target="_blank">
-        <div class="card" style="border-left-color: #38a169;">
-          <div class="card-title">Acompanhamento</div>
-          <div class="card-info">Acompanhamento Follow-Up em tempo real</div>
-        </div>
-      </a>
-
-      <a href="https://docs.google.com/spreadsheets/d/1aXwXtdTKjf3aJIG_zXbGBZ8Xd2-9INIBZq6YWSZXcpc/edit?gid=0#gid=0" target="_blank">
-        <div class="card" style="border-left-color: #38a169;">
-          <div class="card-title">Reuniões Feitas</div>
-          <div class="card-info">Atualizar Diariamente sem falta</div>
-        </div>
-      </a>
-      
-
+    <div class="header-right">
+      <div class="user-badge">📌 Carlos Amaral</div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema" id="themeBtn">🌙</button>
     </div>
+  </header>
 
-    <!-- Links de Pagamento -->
-    <div class="kanban-column pagamentos">
-      <h2>💳 Links de Pagamento</h2>
+  <main>
+    <p class="page-title">Painel de Acesso Rápido</p>
 
-      <div class="card" style="border-left-color: #ed8936;" onclick="copyToClipboard('https://pay.kiwify.com.br/XXq93vs')">
-        <div class="card-title">Club Padrão</div>
-        <div class="card-info">R$1.997,00 em até 12x R$166,40</div>
-      </div>
-     
-      <div class="card" style="border-left-color: #ed8936;" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/Ri1D-BYnFhsQBr-1500,00')">
-        <div class="card-title">Club R$1.500</div>
-        <div class="card-info">R$1.500,00 em até 12x R$125,00</div>
-      </div>
+    <div class="board">
 
-
-      <div class="card" style="border-left-color: #ed8936;" onclick="copyToClipboard('https://pay.kiwify.com.br/XXq93vs')">
-        <div class="card-title">Club Padrão</div>
-        <div class="card-info">R$1.000,00 em até 12x R$103,42</div>
-      </div>
-
-      <div class="card" style="border-left-color: #ed8936;" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-71aor60KDL-15000,00')">
-        <div class="card-title">Pro Semestral</div>
-        <div class="card-info">R$15.000,00 à vista</div>
-        <div class="card-info">6x R$2.797,00 ou 12x de R$ 1.499,89</div>
-      </div>
-
-      <div class="card" style="border-left-color: #ed8936;" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-2LD5SgQlgL-13550,00')">
-        <div class="card-title">Pro Semestral Limite</div>
-        <div class="card-info">R$14.000,00 à vista</div>
-        <div class="card-info">6x R$2.500,10 ou 12x R$ 1.354,90</div>
-      </div>
- 
-      <div class="card" style="border-left-color: #ed8936;" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-71dB2HMB9b-25960,00')">
-        <div class="card-title">Pro Anual</div>
-        <div class="card-info">R$25.000,00 à vista</div>
-        <div class="card-info">12x R$2.597,00</div>
-      </div>
-
-      <div class="card" style="border-left-color: #ed8936;" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-71dC7p8UvZ-23980,00')">
-        <div class="card-title">Pro Anual Limite</div>
-        <div class="card-info">R$24.000,00 à vista</div>
-        <div class="card-info">12x R$2.397</div>
-      </div>
-
-    </div>
-
-    <!-- Criação de Contratos -->
-    <div class="kanban-column contratos">
-      <h2>💳 Criação de Contratos</h2>
-
-     
-       <a href="https://app.zapsign.com.br/verificar/doc/5dee1c00-e0f1-4eeb-b197-a8d3f8fdc0ab" target="_blank">
-        <div class="card" style="border-left-color: #a830cd;">
-          <div class="card-title">Plano Pro SEM FIDELIDADE MRR</div>
-          <div class="card-info">Sem multa rescisória e aviso prévio 30 dias</div>
+      <!-- ── FERRAMENTAS ── -->
+      <div class="col col-ferramentas">
+        <div class="col-header">
+          <div class="col-icon">📅</div>
+          <span class="col-title">Ferramentas</span>
+          <span class="col-count">14</span>
         </div>
-      </a>
+        <div class="col-body">
 
-      <a href="https://app.zapsign.com.br/verificar/doc/50b00fa1-76d9-4b67-9a16-d093a51b0063" target="_blank">
-        <div class="card" style="border-left-color: #a830cd;">
-          <div class="card-title">Plano Pro MRR:(boleto ou pix mensal)</div>
-          <div class="card-info">Utilizado para planos com pagamento recorrente</div>
-        </div>
-      </a>
+          <a class="card" href="https://meu.businessdigital360.com.br/v2/location/gbkhVMNStgwRjHc3NUZY/opportunities/list" target="_blank">
+            <div class="card-title">BD360 CRM</div>
+            <div class="card-info">Acompanhe os leads e oportunidades</div>
+          </a>
 
-       <a href="https://app.zapsign.com.br/verificar/doc/aa1fdea8-deb4-43f0-b2fb-fcb508681abf" target="_blank">
-        <div class="card" style="border-left-color: #a830cd;">
-          <div class="card-title">Plano Pro TCV - Cartão de Crédito</div>
-          <div class="card-info">Utilizado para pagamento em cartão de crédito</div>
-        </div>
-      </a>
+          <a class="card" href="https://web.whatsapp.com/" target="_blank">
+            <div class="card-title">WhatsApp Web</div>
+            <div class="card-info">Comunicação com leads e clientes</div>
+          </a>
 
-             <a href="https://app.zapsign.com.br/verificar/doc/128791d4-1c55-48b2-931a-3184c4389056 " target="_blank">
-        <div class="card" style="border-left-color: #a830cd;">
-          <div class="card-title"> Plano Start MRR (boleto ou pix mensal)</div>
-          <div class="card-info">Utilizado para o plano START (sem tráfego pago) com pagamento recorrente mensal</div>
-        </div>
-      </a>
+          <a class="card" href="https://calendar.google.com/calendar/u/0/r/week" target="_blank">
+            <div class="card-title">Google Agenda</div>
+            <div class="card-info">Agenda semanal de reuniões</div>
+          </a>
 
-       <a href="https://app.zapsign.com.br/verificar/doc/29cd1f68-1dc8-4551-90e9-5b942de1981e" target="_blank">
-        <div class="card" style="border-left-color: #a830cd;">
-          <div class="card-title"> Plano Pro MRR (boleto ou pix mensal) com implementação</div>
-          <div class="card-info">Utilizado para o plano PRO com pagamento recorrente mensal e implementação</div>
+          <a class="card" href="https://docs.google.com/presentation/d/1SP91Qj3OsemyplTHPjusSB0JUliD_7Zgw6AT9iFVRo4/edit?slide=id.g37064a72edb_0_0#slide=id.g37064a72edb_0_0" target="_blank">
+            <div class="card-title">Apresentação</div>
+            <div class="card-info">Material para lojas de materiais de construção</div>
+          </a>
+
+          <a class="card" href="https://docs.google.com/presentation/d/1cEdNRIEPDLUo4A-UdtoO9ml-K7ga_eVLYTX2oquPBhY/edit?slide=id.p#slide=id.p" target="_blank">
+            <div class="card-title">Sessão Consultoria</div>
+            <div class="card-info">Apresentação da Consultoria Acelera</div>
+          </a>
+
+          <a class="card" href="https://forms.clickup.com/36963815/f/1381f7-13553/42YWKRQ1J7FGV3LNCR" target="_blank">
+            <div class="card-title">Formulário ClickUP</div>
+            <div class="card-info">Formulário para preenchimento de dados</div>
+          </a>
+
+          <a class="card" href="https://app.clickup.com/36963815/v/l/sh/36963815" target="_blank">
+            <div class="card-title">ClickUP</div>
+            <div class="card-info">Painel principal</div>
+          </a>
+
+          <a class="card" href="https://doc.clickup.com/36963815/p/h/1381f7-8333/02c02111d7b9b94" target="_blank">
+            <div class="card-title">Playbook Closer</div>
+            <div class="card-info">Manual do Closer</div>
+          </a>
+
+          <a class="card" href="https://ia.aceleraobra.com.br/conversas" target="_blank">
+            <div class="card-title">IA Acelera</div>
+            <div class="card-info">Painel da IA de Atendimento</div>
+          </a>
+
+          <div class="card" onclick="copyToClipboard('financeiro@aceleraobra.com.br', 'E-mail copiado!')">
+            <div class="card-title">Financeiro Acelera Obra</div>
+            <div class="card-info">Chave Pix — E-mail</div>
+            <div class="card-copy-hint">⎘ clique para copiar</div>
+          </div>
+
+          <a class="card" href="https://doc.clickup.com/36963815/p/h/1381f7-14853/5c67072a29fdc39" target="_blank">
+            <div class="card-title">Calendário Novembro</div>
+            <div class="card-info">Apresentação do Calendário</div>
+          </a>
+
+          <a class="card" href="https://docs.google.com/spreadsheets/d/1-eMzfI3PCEcPC-hVKjlqWCrEhcjiFi7CX-xXkg_Fy2o/edit?gid=528233429#gid=528233429" target="_blank">
+            <div class="card-title">PGM Acacio</div>
+            <div class="card-info">Apresentação da PGM</div>
+          </a>
+
+          <div class="card" onclick="openTranscriptionPopup()">
+            <div class="card-title">🎙️ Transcritor de Áudio</div>
+            <div class="card-info">Transcreva reuniões ou áudios do sistema</div>
+          </div>
+
+          <a class="card" href="https://docs.google.com/document/d/18wGuusNhwuT8iRL_eivd74F6EtGCQEP2WAY8X3P0-nM/edit?tab=t.0#heading=h.1np2j5tul8j7" target="_blank">
+            <div class="card-title">Playbook Closer — Consultoria</div>
+            <div class="card-info">Script completo da Apresentação da Consultoria</div>
+          </a>
+
         </div>
-      </a>
+      </div>
+
+      <!-- ── RELATÓRIOS ── -->
+      <div class="col col-relatorios">
+        <div class="col-header">
+          <div class="col-icon">📈</div>
+          <span class="col-title">Relatórios Diários</span>
+          <span class="col-count">5</span>
+        </div>
+        <div class="col-body">
+
+          <a class="card" href="https://docs.google.com/document/u/0/?tgif=d" target="_blank">
+            <div class="card-title">Google Docs</div>
+            <div class="card-info">Transcrição de reuniões</div>
+          </a>
+
+          <a class="card" href="https://gemini.google.com/gem/73dea6720d32" target="_blank">
+            <div class="card-title">Assistente Gemini</div>
+            <div class="card-info">Resumos, propostas e checklists</div>
+          </a>
+
+          <a class="card" href="https://docs.google.com/spreadsheets/d/1a0-B6UfHhRCrn3dYy6lGvuFeEOh5zV80GMk816sgWhI/edit?gid=1830719344#gid=1830719344" target="_blank">
+            <div class="card-title">Resultados Mensais</div>
+            <div class="card-info">Registro de Resultados Mensais Carlos</div>
+          </a>
+
+          <a class="card" href="https://docs.google.com/document/d/1XAfbgVhLLJ-ELWKvIi-shIP7RTx2Eobob5-UmTW_0hc/edit?tab=t.0" target="_blank">
+            <div class="card-title">Acompanhamento</div>
+            <div class="card-info">Acompanhamento Follow-Up em tempo real</div>
+          </a>
+
+          <a class="card" href="https://docs.google.com/spreadsheets/d/1aXwXtdTKjf3aJIG_zXbGBZ8Xd2-9INIBZq6YWSZXcpc/edit?gid=0#gid=0" target="_blank">
+            <div class="card-title">Reuniões Feitas</div>
+            <div class="card-info">Atualizar diariamente sem falta</div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ── PAGAMENTOS ── -->
+      <div class="col col-pagamentos">
+        <div class="col-header">
+          <div class="col-icon">💳</div>
+          <span class="col-title">Links de Pagamento</span>
+          <span class="col-count">7</span>
+        </div>
+        <div class="col-body">
+
+          <div class="card" onclick="copyToClipboard('https://pay.kiwify.com.br/XXq93vs')">
+            <div class="card-title">Club Padrão</div>
+            <div class="card-info">R$1.997,00 — até 12x R$166,40</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/Ri1D-BYnFhsQBr-1500,00')">
+            <div class="card-title">Club R$1.500</div>
+            <div class="card-info">R$1.500,00 — até 12x R$125,00</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://pay.kiwify.com.br/XXq93vs')">
+            <div class="card-title">Club R$1.000</div>
+            <div class="card-info">R$1.000,00 — até 12x R$103,42</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-71aor60KDL-15000,00')">
+            <div class="card-title">Pro Semestral</div>
+            <div class="card-info">R$15.000,00 à vista</div>
+            <div class="card-info">6x R$2.797,00 ou 12x R$1.499,89</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-2LD5SgQlgL-13550,00')">
+            <div class="card-title">Pro Semestral Limite</div>
+            <div class="card-info">R$14.000,00 à vista</div>
+            <div class="card-info">6x R$2.500,10 ou 12x R$1.354,90</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-71dB2HMB9b-25960,00')">
+            <div class="card-title">Pro Anual</div>
+            <div class="card-info">R$25.000,00 à vista</div>
+            <div class="card-info">12x R$2.597,00</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://pay.infinitepay.io/aceleraobra/VC1D-71dC7p8UvZ-23980,00')">
+            <div class="card-title">Pro Anual Limite</div>
+            <div class="card-info">R$24.000,00 à vista</div>
+            <div class="card-info">12x R$2.397,00</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── CONTRATOS ── -->
+      <div class="col col-contratos">
+        <div class="col-header">
+          <div class="col-icon">📄</div>
+          <span class="col-title">Criação de Contratos</span>
+          <span class="col-count">5</span>
+        </div>
+        <div class="col-body">
+
+          <a class="card" href="https://app.zapsign.com.br/verificar/doc/5dee1c00-e0f1-4eeb-b197-a8d3f8fdc0ab" target="_blank">
+            <div class="card-title">Plano Pro — Sem Fidelidade MRR</div>
+            <div class="card-info">Sem multa rescisória e aviso prévio 30 dias</div>
+          </a>
+
+          <a class="card" href="https://app.zapsign.com.br/verificar/doc/50b00fa1-76d9-4b67-9a16-d093a51b0063" target="_blank">
+            <div class="card-title">Plano Pro MRR</div>
+            <div class="card-info">Boleto ou pix mensal — pagamento recorrente</div>
+          </a>
+
+          <a class="card" href="https://app.zapsign.com.br/verificar/doc/aa1fdea8-deb4-43f0-b2fb-fcb508681abf" target="_blank">
+            <div class="card-title">Plano Pro TCV</div>
+            <div class="card-info">Pagamento em cartão de crédito</div>
+          </a>
+
+          <a class="card" href="https://app.zapsign.com.br/verificar/doc/128791d4-1c55-48b2-931a-3184c4389056" target="_blank">
+            <div class="card-title">Plano Start MRR</div>
+            <div class="card-info">Plano START (sem tráfego pago) — pagamento recorrente mensal</div>
+          </a>
+
+          <a class="card" href="https://app.zapsign.com.br/verificar/doc/29cd1f68-1dc8-4551-90e9-5b942de1981e" target="_blank">
+            <div class="card-title">Plano Pro MRR + Implementação</div>
+            <div class="card-info">Plano PRO recorrente mensal com implementação inclusa</div>
+          </a>
+
+        </div>
+      </div>
 
     </div>
-    
-  </div>
+  </main>
 
   <!-- Toast -->
-  <div id="toast">✅ Link copiado!</div>
+  <div id="toast">✓ Copiado!</div>
+
+  <!-- Transcription Modal -->
+  <div class="modal-overlay" id="transcriptionModal" onclick="handleOverlayClick(event)">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div class="modal-title-dot"></div>
+          Ferramenta de Transcrição
+        </div>
+        <button class="modal-close" onclick="closeTranscriptionPopup()">×</button>
+      </div>
+      <div class="modal-body">
+        <iframe src="traudio.html"></iframe>
+      </div>
+    </div>
+  </div>
 
   <script>
-    function copyToClipboard(link) {
-      navigator.clipboard.writeText(link).then(() => {
-        const toast = document.getElementById("toast");
-        toast.style.display = "block";
-        setTimeout(() => {
-          toast.style.display = "none";
-        }, 2000);
-      });
+    // ─── THEME ───────────────────────────────────────
+    const root = document.documentElement;
+    const btn  = document.getElementById('themeBtn');
+
+    function toggleTheme() {
+      const isDark = root.getAttribute('data-theme') === 'dark';
+      root.setAttribute('data-theme', isDark ? 'light' : 'dark');
+      btn.textContent = isDark ? '🌙' : '☀️';
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
     }
 
+    // Restore saved theme
+    const saved = localStorage.getItem('theme');
+    if (saved) {
+      root.setAttribute('data-theme', saved);
+      btn.textContent = saved === 'light' ? '🌙' : '☀️';
+    }
+
+    // ─── CLIPBOARD ───────────────────────────────────
+    function copyToClipboard(text, msg = 'Link copiado!') {
+      navigator.clipboard.writeText(text).then(() => showToast(msg));
+    }
+
+    function showToast(msg = 'Copiado!') {
+      const toast = document.getElementById('toast');
+      toast.textContent = '✓ ' + msg;
+      toast.classList.add('show');
+      clearTimeout(toast._t);
+      toast._t = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // ─── MODAL ───────────────────────────────────────
     function openTranscriptionPopup() {
-  document.getElementById("transcriptionModal").style.display = "block";
-  document.body.style.overflow = "hidden"; // Trava o scroll da página principal
-}
+      document.getElementById('transcriptionModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
 
-function closeTranscriptionPopup() {
-  document.getElementById("transcriptionModal").style.display = "none";
-  document.body.style.overflow = "auto"; // Libera o scroll
-}
+    function closeTranscriptionPopup() {
+      document.getElementById('transcriptionModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
 
-// Fecha o popup se o usuário clicar fora da janela branca
-window.onclick = function(event) {
-  const modal = document.getElementById("transcriptionModal");
-  if (event.target == modal) {
-    closeTranscriptionPopup();
-  }
-}
+    function handleOverlayClick(e) {
+      if (e.target === document.getElementById('transcriptionModal')) {
+        closeTranscriptionPopup();
+      }
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeTranscriptionPopup();
+    });
   </script>
-
-  <div id="transcriptionModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color: rgba(0,0,0,0.6); backdrop-filter: blur(5px);">
-  <div style="background-color: white; margin: 5% auto; padding: 0; border-radius: 15px; width: 80%; max-width: 800px; height: 80vh; position: relative; overflow: hidden; box-shadow: 0 5px 30px rgba(0,0,0,0.3);">
-    
-    <div style="padding: 15px 20px; background: #2d3748; color: white; display: flex; justify-content: space-between; align-items: center;">
-      <span style="font-weight: bold;">Ferramenta de Transcrição</span>
-      <button onclick="closeTranscriptionPopup()" style="background: none; border: none; color: white; cursor: pointer; font-size: 24px;">&times;</button>
-    </div>
-
-    <iframe src="traudio.html" style="width: 100%; height: calc(100% - 60px); border: none;"></iframe>
-    
-  </div>
-</div>
 
 </body>
 </html>
-
-
