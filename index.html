@@ -321,6 +321,99 @@
       opacity: 0.7;
     }
 
+    /* ─── MODO EDIÇÃO DOS CARDS ───────────────────── */
+    .theme-toggle.ativo {
+      color: var(--blue);
+      border-color: var(--blue);
+      background: var(--blue-dim);
+    }
+
+    .card-lapis {
+      display: none;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      font-size: 10px;
+      line-height: 20px;
+      text-align: center;
+    }
+
+    body[data-editmode="on"] .col-body .card[data-chave] {
+      border-style: dashed;
+      padding-right: 38px;
+    }
+    body[data-editmode="on"] .col-body .card[data-chave] .card-lapis { display: block; }
+    body[data-editmode="on"] .col-body .card[data-chave]:hover { transform: none; }
+
+    .card-editor {
+      display: none;
+      background: var(--surface-2);
+      border: 1px solid var(--blue);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+    }
+    .card-editor.aberto { display: block; }
+
+    .card-editor label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .card-editor .card-editor-alvo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 12.5px;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .card-editor input {
+      width: 100%;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12.5px;
+      padding: 9px 11px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+    }
+    .card-editor input:focus { border-color: var(--blue); }
+
+    .card-editor-botoes { display: flex; gap: 8px; margin-top: 10px; }
+
+    .card-btn {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1;
+      padding: 8px 13px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface-3);
+      color: var(--text-subtle);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .card-btn:hover { color: var(--text); border-color: var(--blue); }
+    .card-btn.forte { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .card-btn.forte:hover { filter: brightness(1.1); }
+
+    .card-editor .card-erro {
+      display: none;
+      margin-top: 8px;
+      font-size: 11.5px;
+      color: var(--red);
+    }
+    .card-editor[data-erro="sim"] .card-erro { display: block; }
+
     /* ─── TOAST ───────────────────────────────────── */
     #toast {
       position: fixed;
@@ -610,6 +703,7 @@
     </div>
     <div class="header-right">
       <div class="user-badge">📌 Carlos Amaral</div>
+      <button class="theme-toggle" onclick="toggleEditMode()" title="Editar links dos cards" id="editBtn">✏️</button>
       <button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema" id="themeBtn">🌙</button>
     </div>
   </header>
@@ -1216,12 +1310,168 @@
       closeContratos();
     });
 
+    // ─── MEMÓRIA DOS LINKS EDITADOS ──────────────────
+    const CHAVE_LINKS = 'aceleraLinks';
+
+    function lerLinks() {
+      try { return JSON.parse(localStorage.getItem(CHAVE_LINKS) || '{}'); }
+      catch (e) { return {}; }
+    }
+
+    function gravarLink(chave, valor) {
+      try {
+        const dados = lerLinks();
+        dados[chave] = valor;
+        localStorage.setItem(CHAVE_LINKS, JSON.stringify(dados));
+      } catch (e) { /* segue só na sessão */ }
+    }
+
+    // ─── MODO EDIÇÃO DOS CARDS ───────────────────────
+    function toggleEditMode() {
+      const ligado = document.body.dataset.editmode === 'on';
+      if (ligado) {
+        delete document.body.dataset.editmode;
+        document.querySelectorAll('.card-editor.aberto').forEach(ed => ed.classList.remove('aberto'));
+      } else {
+        document.body.dataset.editmode = 'on';
+      }
+      document.getElementById('editBtn').classList.toggle('ativo', !ligado);
+      showToast(ligado ? 'Edição encerrada' : 'Modo edição: clique num card');
+    }
+
+    (function prepararCards() {
+      const salvos = lerLinks();
+
+      document.querySelectorAll('.col-body .card').forEach((card, indice) => {
+        const tituloEl = card.querySelector('.card-title');
+        if (!tituloEl) return;
+
+        const titulo = tituloEl.textContent.trim();
+        const chave  = indice + '::' + titulo;
+        const ehLink = card.tagName === 'A';
+        let valor = '';
+        let mensagem = 'Link copiado!';
+
+        if (ehLink) {
+          valor = card.getAttribute('href');
+        } else {
+          const inline = card.getAttribute('onclick') || '';
+          const achou = inline.match(/copyToClipboard\((['"])([\s\S]*?)\1(?:\s*,\s*(['"])([\s\S]*?)\3)?\)/);
+          if (!achou) return; // cards que abrem modal ficam de fora
+          valor = achou[2];
+          mensagem = achou[4] || mensagem;
+          card.removeAttribute('onclick');
+          card.addEventListener('click', () => {
+            if (document.body.dataset.editmode === 'on') return;
+            copyToClipboard(card.dataset.valor, card.dataset.mensagem);
+          });
+        }
+
+        if (salvos[chave]) valor = salvos[chave];
+
+        card.dataset.chave = chave;
+        card.dataset.valor = valor;
+        card.dataset.mensagem = mensagem;
+        card.dataset.tipo = ehLink ? 'link' : 'copia';
+        if (ehLink) card.setAttribute('href', valor);
+
+        const lapis = document.createElement('span');
+        lapis.className = 'card-lapis';
+        lapis.textContent = '✏️';
+        card.appendChild(lapis);
+
+        const editor = document.createElement('div');
+        editor.className = 'card-editor';
+        editor.innerHTML =
+          '<div class="card-editor-alvo"></div>' +
+          '<label>' + (ehLink ? 'Endereço do link' : 'Conteúdo copiado pelo card') + '</label>' +
+          '<input type="text" spellcheck="false">' +
+          '<p class="card-erro">Informe um endereço começando com https:// ou um texto válido.</p>' +
+          '<div class="card-editor-botoes">' +
+            '<button class="card-btn forte" type="button" data-acao="salvar">Salvar</button>' +
+            '<button class="card-btn" type="button" data-acao="cancelar">Cancelar</button>' +
+            '<button class="card-btn" type="button" data-acao="restaurar">Restaurar original</button>' +
+          '</div>';
+        editor.dataset.original = valor;
+        card.insertAdjacentElement('afterend', editor);
+
+        const campo = editor.querySelector('input');
+        editor.querySelector('.card-editor-alvo').textContent = titulo;
+
+        function fechar() {
+          editor.classList.remove('aberto');
+          editor.removeAttribute('data-erro');
+        }
+
+        function salvar() {
+          const novo = campo.value.trim();
+          const valido = card.dataset.tipo === 'link'
+            ? /^https?:\/\/\S+$/.test(novo)
+            : novo.length > 0;
+
+          if (!valido) {
+            editor.dataset.erro = 'sim';
+            campo.focus();
+            return;
+          }
+
+          card.dataset.valor = novo;
+          if (card.dataset.tipo === 'link') card.setAttribute('href', novo);
+          gravarLink(chave, novo);
+          fechar();
+          showToast('Link atualizado!');
+        }
+
+        editor.querySelector('[data-acao="salvar"]').addEventListener('click', salvar);
+        editor.querySelector('[data-acao="cancelar"]').addEventListener('click', fechar);
+        editor.querySelector('[data-acao="restaurar"]').addEventListener('click', () => {
+          campo.value = editor.dataset.original;
+          editor.removeAttribute('data-erro');
+          campo.focus();
+        });
+
+        campo.addEventListener('keydown', ev => {
+          ev.stopPropagation();
+          if (ev.key === 'Enter')  { ev.preventDefault(); salvar(); }
+          if (ev.key === 'Escape') { fechar(); }
+        });
+
+        card._abrirEditor = function () {
+          document.querySelectorAll('.card-editor.aberto').forEach(outro => {
+            if (outro !== editor) outro.classList.remove('aberto');
+          });
+          campo.value = card.dataset.valor;
+          editor.removeAttribute('data-erro');
+          editor.classList.add('aberto');
+          campo.focus();
+          campo.select();
+        };
+      });
+    })();
+
+    // Em modo edição, o clique no card abre o editor em vez da ação normal
+    document.addEventListener('click', e => {
+      if (document.body.dataset.editmode !== 'on') return;
+      const card = e.target.closest('.col-body .card[data-chave]');
+      if (!card) return;
+      e.preventDefault();
+      e.stopPropagation();
+      card._abrirEditor();
+    }, true);
+
     // ─── EDIÇÃO DOS LINKS DE CONTRATO ────────────────
-    document.querySelectorAll('.ct-item').forEach(item => {
+    document.querySelectorAll('.ct-item').forEach((item, indice) => {
       const abrir  = item.querySelector('.ct-btn--forte');
       const url    = item.querySelector('.ct-url');
       const edicao = item.querySelector('.ct-edicao');
       const campo  = item.querySelector('input');
+      const chaveCt = 'contrato::' + indice;
+
+      const salvoCt = lerLinks()[chaveCt];
+      if (salvoCt) {
+        abrir.href = salvoCt;
+        url.textContent = salvoCt;
+      }
 
       function abrirEdicao() {
         campo.value = abrir.href;
@@ -1244,6 +1494,7 @@
         }
         abrir.href = novo;
         url.textContent = novo;
+        gravarLink(chaveCt, novo);
         fecharEdicao();
         showToast('Link atualizado!');
       }
