@@ -367,7 +367,6 @@
     }
     body[data-editmode="on"] .edit-bar { display: flex; }
     .edit-bar strong { color: var(--text); font-weight: 600; }
-    .edit-bar .card-btn { margin-left: auto; }
 
     body[data-editmode="on"] .col-body .card {
       border-style: dashed;
@@ -642,7 +641,6 @@
 
     <div class="edit-bar">
       <span><strong>Modo edição.</strong> Clique num card para editar, use ↑ ↓ para reordenar, ✕ para excluir ou "+ Novo card".</span>
-      <button class="card-btn" type="button" id="restaurarBtn">Restaurar quadro original</button>
     </div>
 
     <div class="board">
@@ -1234,15 +1232,6 @@
       abrirEditor(colId, quadro[colId].length - 1);
     }
 
-    function restaurarQuadro() {
-      if (!confirm('Descartar todas as alterações e voltar ao quadro original?')) return;
-      quadro = JSON.parse(JSON.stringify(padrao));
-      try { localStorage.removeItem(CHAVE_QUADRO); } catch (e) {}
-      fecharEditores();
-      renderQuadro();
-      showToast('Quadro restaurado');
-    }
-
     // ─── MODO EDIÇÃO ─────────────────────────────────
     function toggleEditMode() {
       const ligado = document.body.dataset.editmode === 'on';
@@ -1285,8 +1274,6 @@
       if (acao === 'excluir') excluirCard(colId, indice);
       if (acao === 'editar')  abrirEditor(colId, indice);
     }, true);
-
-    document.getElementById('restaurarBtn').addEventListener('click', restaurarQuadro);
 
     // ─── INICIALIZAÇÃO ───────────────────────────────
     padrao = lerQuadroDoHTML();
