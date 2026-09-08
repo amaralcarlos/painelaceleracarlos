@@ -353,34 +353,74 @@
       background: var(--blue-dim);
     }
 
-    .card-lapis {
+    .edit-bar {
       display: none;
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 22px;
-      height: 22px;
+      align-items: center;
+      gap: 10px;
+      background: var(--blue-dim);
+      border: 1px dashed var(--blue);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      font-size: 12.5px;
+      color: var(--text-subtle);
+    }
+    body[data-editmode="on"] .edit-bar { display: flex; }
+    .edit-bar strong { color: var(--text); font-weight: 600; }
+    .edit-bar .card-btn { margin-left: auto; }
+
+    body[data-editmode="on"] .col-body .card {
+      border-style: dashed;
+      cursor: default;
+    }
+    body[data-editmode="on"] .col-body .card:hover { transform: none; }
+
+    .card-ctrl {
+      display: none;
+      gap: 6px;
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px dashed var(--border);
+    }
+    body[data-editmode="on"] .card-ctrl { display: flex; }
+
+    .card-ctrl-btn {
+      width: 26px;
+      height: 24px;
       border-radius: 6px;
       background: var(--surface-3);
       border: 1px solid var(--border);
-      font-size: 10px;
-      line-height: 20px;
+      color: var(--text-subtle);
+      font-size: 11px;
+      line-height: 22px;
       text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
     }
+    .card-ctrl-btn:hover { color: var(--text); border-color: var(--blue); }
+    .card-ctrl-btn.perigo { margin-left: auto; }
+    .card-ctrl-btn.perigo:hover { color: var(--red); border-color: var(--red); }
 
-    body[data-editmode="on"] .col-body .card[data-chave] {
-      border-style: dashed;
-      padding-right: 38px;
+    .card-add {
+      display: none;
+      text-align: center;
+      padding: 10px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-muted);
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: all 0.15s;
     }
-    body[data-editmode="on"] .col-body .card[data-chave] .card-lapis { display: block; }
-    body[data-editmode="on"] .col-body .card[data-chave]:hover { transform: none; }
+    body[data-editmode="on"] .card-add { display: block; }
+    .card-add:hover { color: var(--blue); border-color: var(--blue); background: var(--blue-dim); }
 
     .card-editor {
       display: none;
       background: var(--surface-2);
       border: 1px solid var(--blue);
       border-radius: var(--radius-sm);
-      padding: 12px 14px;
+      padding: 14px;
     }
     .card-editor.aberto { display: block; }
 
@@ -388,18 +428,21 @@
       display: block;
       font-size: 11px;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin: 0 0 6px;
+    }
+    .card-editor label + input,
+    .card-editor label + textarea,
+    .card-editor label + select { margin-bottom: 10px; }
+
+    .card-editor .ed-dica {
+      color: var(--text-muted);
+      opacity: 0.7;
+      font-style: italic;
     }
 
-    .card-editor .card-editor-alvo {
-      font-family: 'Syne', sans-serif;
-      font-weight: 600;
-      font-size: 12.5px;
-      color: var(--text);
-      margin-bottom: 8px;
-    }
-
-    .card-editor input {
+    .card-editor input,
+    .card-editor textarea,
+    .card-editor select {
       width: 100%;
       font-family: 'DM Sans', sans-serif;
       font-size: 12.5px;
@@ -409,10 +452,18 @@
       background: var(--bg);
       color: var(--text);
       outline: none;
+      resize: vertical;
     }
-    .card-editor input:focus { border-color: var(--blue); }
+    .card-editor input:focus,
+    .card-editor textarea:focus,
+    .card-editor select:focus { border-color: var(--blue); }
 
-    .card-editor-botoes { display: flex; gap: 8px; margin-top: 10px; }
+    .card-editor-botoes {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
 
     .card-btn {
       font-family: 'DM Sans', sans-serif;
@@ -430,10 +481,12 @@
     .card-btn:hover { color: var(--text); border-color: var(--blue); }
     .card-btn.forte { background: var(--blue); border-color: var(--blue); color: #fff; }
     .card-btn.forte:hover { filter: brightness(1.1); }
+    .card-btn.perigo { margin-left: auto; }
+    .card-btn.perigo:hover { color: var(--red); border-color: var(--red); }
 
     .card-editor .card-erro {
       display: none;
-      margin-top: 8px;
+      margin-top: 10px;
       font-size: 11.5px;
       color: var(--red);
     }
@@ -586,6 +639,11 @@
 
   <main>
     <p class="page-title">Painel de Acesso Rápido</p>
+
+    <div class="edit-bar">
+      <span><strong>Modo edição.</strong> Clique num card para editar, use ↑ ↓ para reordenar, ✕ para excluir ou "+ Novo card".</span>
+      <button class="card-btn" type="button" id="restaurarBtn">Restaurar quadro original</button>
+    </div>
 
     <div class="board">
 
@@ -853,11 +911,12 @@
       const isDark = root.getAttribute('data-theme') === 'dark';
       root.setAttribute('data-theme', isDark ? 'light' : 'dark');
       btn.textContent = isDark ? '🌙' : '☀️';
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      try { localStorage.setItem('theme', isDark ? 'light' : 'dark'); } catch (e) {}
     }
 
     // Restore saved theme
-    const saved = localStorage.getItem('theme');
+    let saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
     if (saved) {
       root.setAttribute('data-theme', saved);
       btn.textContent = saved === 'light' ? '🌙' : '☀️';
@@ -898,155 +957,346 @@
       closeTranscriptionPopup();
     });
 
-    // ─── MEMÓRIA DOS LINKS EDITADOS ──────────────────
-    const CHAVE_LINKS = 'aceleraLinks';
+    // ═══ QUADRO EDITÁVEL ═════════════════════════════
+    const CHAVE_QUADRO = 'aceleraQuadro';
+    let quadro = null;   // estado atual
+    let padrao = null;   // estado que veio no arquivo
 
-    function lerLinks() {
-      try { return JSON.parse(localStorage.getItem(CHAVE_LINKS) || '{}'); }
-      catch (e) { return {}; }
-    }
-
-    function gravarLink(chave, valor) {
+    function lerQuadroSalvo() {
       try {
-        const dados = lerLinks();
-        dados[chave] = valor;
-        localStorage.setItem(CHAVE_LINKS, JSON.stringify(dados));
-      } catch (e) { /* segue só na sessão */ }
+        const bruto = localStorage.getItem(CHAVE_QUADRO);
+        return bruto ? JSON.parse(bruto) : null;
+      } catch (e) { return null; }
     }
 
-    // ─── MODO EDIÇÃO DOS CARDS ───────────────────────
+    function salvarQuadro() {
+      try { localStorage.setItem(CHAVE_QUADRO, JSON.stringify(quadro)); }
+      catch (e) { /* segue só na sessão */ }
+    }
+
+    // ─── LEITURA DO HTML ORIGINAL ────────────────────
+    function lerQuadroDoHTML() {
+      const dados = {};
+      document.querySelectorAll('.col').forEach(col => {
+        const id = [...col.classList].find(c => c.startsWith('col-') && c !== 'col-body');
+        const itens = [];
+
+        col.querySelectorAll('.col-body > *').forEach(el => {
+          if (el.classList.contains('col-sep')) {
+            itens.push({ t: 'sep', texto: el.textContent.trim() });
+          } else if (el.classList.contains('col-nota')) {
+            itens.push({ t: 'nota', texto: el.textContent.trim() });
+          } else if (el.classList.contains('card')) {
+            const titulo = (el.querySelector('.card-title') || {}).textContent || '';
+            const infos = [...el.querySelectorAll('.card-info')].map(i => i.textContent.trim());
+            if (el.tagName === 'A') {
+              itens.push({ t: 'card', tipo: 'link', titulo: titulo.trim(), infos, valor: el.getAttribute('href') });
+            } else {
+              const inline = el.getAttribute('onclick') || '';
+              const achou = inline.match(/copyToClipboard\((['"])([\s\S]*?)\1(?:\s*,\s*(['"])([\s\S]*?)\3)?\)/);
+              itens.push({
+                t: 'card', tipo: 'copia', titulo: titulo.trim(), infos,
+                valor: achou ? achou[2] : '',
+                mensagem: achou && achou[4] ? achou[4] : 'Link copiado!'
+              });
+            }
+          }
+        });
+
+        dados[id] = itens;
+      });
+      return dados;
+    }
+
+    // ─── RENDERIZAÇÃO ────────────────────────────────
+    function contarCards(itens) {
+      return itens.filter(i => i.t === 'card').length;
+    }
+
+    function montarCard(item, colId, indice) {
+      const el = document.createElement(item.tipo === 'link' ? 'a' : 'div');
+      el.className = 'card';
+      el.dataset.col = colId;
+      el.dataset.indice = indice;
+
+      if (item.tipo === 'link') {
+        el.href = item.valor;
+        el.target = '_blank';
+        el.rel = 'noopener';
+      }
+
+      const titulo = document.createElement('div');
+      titulo.className = 'card-title';
+      titulo.textContent = item.titulo;
+      el.appendChild(titulo);
+
+      (item.infos || []).filter(Boolean).forEach(texto => {
+        const info = document.createElement('div');
+        info.className = 'card-info';
+        info.textContent = texto;
+        el.appendChild(info);
+      });
+
+      if (item.tipo === 'copia') {
+        const dica = document.createElement('div');
+        dica.className = 'card-copy-hint';
+        dica.textContent = '⎘ clique para copiar';
+        el.appendChild(dica);
+      }
+
+      const ctrl = document.createElement('div');
+      ctrl.className = 'card-ctrl';
+      ctrl.innerHTML =
+        '<span class="card-ctrl-btn" data-acao="subir"   title="Mover para cima">↑</span>' +
+        '<span class="card-ctrl-btn" data-acao="descer"  title="Mover para baixo">↓</span>' +
+        '<span class="card-ctrl-btn" data-acao="editar"  title="Editar card">✏️</span>' +
+        '<span class="card-ctrl-btn perigo" data-acao="excluir" title="Excluir card">✕</span>';
+      el.appendChild(ctrl);
+
+      if (item.tipo === 'copia') {
+        el.addEventListener('click', () => {
+          if (document.body.dataset.editmode === 'on') return;
+          copyToClipboard(item.valor, item.mensagem || 'Link copiado!');
+        });
+      }
+
+      return el;
+    }
+
+    function renderQuadro() {
+      document.querySelectorAll('.col').forEach(col => {
+        const id = [...col.classList].find(c => c.startsWith('col-') && c !== 'col-body');
+        const itens = quadro[id] || [];
+        const corpo = col.querySelector('.col-body');
+        const contador = col.querySelector('.col-count');
+
+        corpo.innerHTML = '';
+        if (contador) contador.textContent = contarCards(itens);
+
+        itens.forEach((item, indice) => {
+          if (item.t === 'nota') {
+            const p = document.createElement('p');
+            p.className = 'col-nota';
+            p.textContent = item.texto;
+            corpo.appendChild(p);
+          } else if (item.t === 'sep') {
+            const d = document.createElement('div');
+            d.className = 'col-sep';
+            d.textContent = item.texto;
+            corpo.appendChild(d);
+          } else {
+            corpo.appendChild(montarCard(item, id, indice));
+          }
+        });
+
+        const novo = document.createElement('div');
+        novo.className = 'card-add';
+        novo.dataset.col = id;
+        novo.textContent = '+ Novo card';
+        corpo.appendChild(novo);
+      });
+    }
+
+    // ─── EDITOR DO CARD ──────────────────────────────
+    function fecharEditores() {
+      document.querySelectorAll('.card-editor').forEach(ed => ed.remove());
+    }
+
+    function abrirEditor(colId, indice) {
+      fecharEditores();
+
+      const item = quadro[colId][indice];
+      const card = document.querySelector('.card[data-col="' + colId + '"][data-indice="' + indice + '"]');
+      if (!card) return;
+
+      const editor = document.createElement('div');
+      editor.className = 'card-editor aberto';
+      editor.innerHTML =
+        '<label>Título</label>' +
+        '<input class="ed-titulo" type="text" spellcheck="false">' +
+        '<label>Descrição <span class="ed-dica">uma linha por parágrafo</span></label>' +
+        '<textarea class="ed-info" rows="2" spellcheck="false"></textarea>' +
+        '<label>Comportamento</label>' +
+        '<select class="ed-tipo">' +
+          '<option value="link">Abrir link em nova aba</option>' +
+          '<option value="copia">Copiar conteúdo</option>' +
+        '</select>' +
+        '<label class="ed-rotulo-valor">Endereço do link</label>' +
+        '<input class="ed-valor" type="text" spellcheck="false">' +
+        '<div class="ed-campo-mensagem">' +
+          '<label>Aviso ao copiar</label>' +
+          '<input class="ed-mensagem" type="text" spellcheck="false">' +
+        '</div>' +
+        '<p class="card-erro"></p>' +
+        '<div class="card-editor-botoes">' +
+          '<button class="card-btn forte" type="button" data-acao="salvar">Salvar</button>' +
+          '<button class="card-btn" type="button" data-acao="cancelar">Cancelar</button>' +
+          '<button class="card-btn perigo" type="button" data-acao="excluir">Excluir card</button>' +
+        '</div>';
+
+      card.insertAdjacentElement('afterend', editor);
+
+      const campoTitulo   = editor.querySelector('.ed-titulo');
+      const campoInfo     = editor.querySelector('.ed-info');
+      const campoTipo     = editor.querySelector('.ed-tipo');
+      const campoValor    = editor.querySelector('.ed-valor');
+      const campoMensagem = editor.querySelector('.ed-mensagem');
+      const rotuloValor   = editor.querySelector('.ed-rotulo-valor');
+      const blocoMensagem = editor.querySelector('.ed-campo-mensagem');
+      const erro          = editor.querySelector('.card-erro');
+
+      campoTitulo.value   = item.titulo || '';
+      campoInfo.value     = (item.infos || []).join('\n');
+      campoTipo.value     = item.tipo;
+      campoValor.value    = item.valor || '';
+      campoMensagem.value = item.mensagem || 'Link copiado!';
+
+      function ajustarTipo() {
+        const ehLink = campoTipo.value === 'link';
+        rotuloValor.textContent = ehLink ? 'Endereço do link' : 'Conteúdo copiado';
+        blocoMensagem.style.display = ehLink ? 'none' : 'block';
+      }
+      ajustarTipo();
+      campoTipo.addEventListener('change', ajustarTipo);
+
+      function salvar() {
+        const titulo = campoTitulo.value.trim();
+        const valor  = campoValor.value.trim();
+        const ehLink = campoTipo.value === 'link';
+
+        if (!titulo) { mostrarErro('Dê um título ao card.'); campoTitulo.focus(); return; }
+        if (ehLink && !/^https?:\/\/\S+$/.test(valor)) {
+          mostrarErro('O endereço precisa começar com https://');
+          campoValor.focus();
+          return;
+        }
+        if (!ehLink && !valor) { mostrarErro('Informe o conteúdo a copiar.'); campoValor.focus(); return; }
+
+        item.titulo = titulo;
+        item.infos  = campoInfo.value.split('\n').map(l => l.trim()).filter(Boolean);
+        item.tipo   = campoTipo.value;
+        item.valor  = valor;
+        item.mensagem = campoMensagem.value.trim() || 'Link copiado!';
+
+        salvarQuadro();
+        renderQuadro();
+        showToast('Card salvo!');
+      }
+
+      function mostrarErro(texto) {
+        erro.textContent = texto;
+        editor.dataset.erro = 'sim';
+      }
+
+      editor.querySelector('[data-acao="salvar"]').addEventListener('click', salvar);
+      editor.querySelector('[data-acao="cancelar"]').addEventListener('click', fecharEditores);
+      editor.querySelector('[data-acao="excluir"]').addEventListener('click', () => excluirCard(colId, indice));
+
+      editor.addEventListener('keydown', ev => {
+        ev.stopPropagation();
+        if (ev.key === 'Escape') fecharEditores();
+        if (ev.key === 'Enter' && ev.target.tagName !== 'TEXTAREA') { ev.preventDefault(); salvar(); }
+      });
+
+      campoTitulo.focus();
+      campoTitulo.select();
+    }
+
+    // ─── AÇÕES DO CARD ───────────────────────────────
+    function excluirCard(colId, indice) {
+      const item = quadro[colId][indice];
+      if (!confirm('Excluir o card "' + item.titulo + '"?')) return;
+      quadro[colId].splice(indice, 1);
+      salvarQuadro();
+      fecharEditores();
+      renderQuadro();
+      showToast('Card excluído');
+    }
+
+    function moverCard(colId, indice, passo) {
+      const itens = quadro[colId];
+      const destino = indice + passo;
+      if (destino < 0 || destino >= itens.length) return;
+      const [item] = itens.splice(indice, 1);
+      itens.splice(destino, 0, item);
+      salvarQuadro();
+      fecharEditores();
+      renderQuadro();
+    }
+
+    function novoCard(colId) {
+      quadro[colId].push({
+        t: 'card', tipo: 'link', titulo: 'Novo card',
+        infos: ['Descreva o card aqui'], valor: 'https://', mensagem: 'Link copiado!'
+      });
+      salvarQuadro();
+      renderQuadro();
+      abrirEditor(colId, quadro[colId].length - 1);
+    }
+
+    function restaurarQuadro() {
+      if (!confirm('Descartar todas as alterações e voltar ao quadro original?')) return;
+      quadro = JSON.parse(JSON.stringify(padrao));
+      try { localStorage.removeItem(CHAVE_QUADRO); } catch (e) {}
+      fecharEditores();
+      renderQuadro();
+      showToast('Quadro restaurado');
+    }
+
+    // ─── MODO EDIÇÃO ─────────────────────────────────
     function toggleEditMode() {
       const ligado = document.body.dataset.editmode === 'on';
       if (ligado) {
         delete document.body.dataset.editmode;
-        document.querySelectorAll('.card-editor.aberto').forEach(ed => ed.classList.remove('aberto'));
+        fecharEditores();
       } else {
         document.body.dataset.editmode = 'on';
       }
       document.getElementById('editBtn').classList.toggle('ativo', !ligado);
-      showToast(ligado ? 'Edição encerrada' : 'Modo edição: clique num card');
+      showToast(ligado ? 'Edição encerrada' : 'Modo edição ativo');
     }
 
-    (function prepararCards() {
-      const salvos = lerLinks();
-
-      document.querySelectorAll('.col-body .card').forEach((card, indice) => {
-        const tituloEl = card.querySelector('.card-title');
-        if (!tituloEl) return;
-
-        const titulo = tituloEl.textContent.trim();
-        const chave  = indice + '::' + titulo;
-        const ehLink = card.tagName === 'A';
-        let valor = '';
-        let mensagem = 'Link copiado!';
-
-        if (ehLink) {
-          valor = card.getAttribute('href');
-        } else {
-          const inline = card.getAttribute('onclick') || '';
-          const achou = inline.match(/copyToClipboard\((['"])([\s\S]*?)\1(?:\s*,\s*(['"])([\s\S]*?)\3)?\)/);
-          if (!achou) return; // cards que abrem modal ficam de fora
-          valor = achou[2];
-          mensagem = achou[4] || mensagem;
-          card.removeAttribute('onclick');
-          card.addEventListener('click', () => {
-            if (document.body.dataset.editmode === 'on') return;
-            copyToClipboard(card.dataset.valor, card.dataset.mensagem);
-          });
-        }
-
-        if (salvos[chave]) valor = salvos[chave];
-
-        card.dataset.chave = chave;
-        card.dataset.valor = valor;
-        card.dataset.mensagem = mensagem;
-        card.dataset.tipo = ehLink ? 'link' : 'copia';
-        if (ehLink) card.setAttribute('href', valor);
-
-        const lapis = document.createElement('span');
-        lapis.className = 'card-lapis';
-        lapis.textContent = '✏️';
-        card.appendChild(lapis);
-
-        const editor = document.createElement('div');
-        editor.className = 'card-editor';
-        editor.innerHTML =
-          '<div class="card-editor-alvo"></div>' +
-          '<label>' + (ehLink ? 'Endereço do link' : 'Conteúdo copiado pelo card') + '</label>' +
-          '<input type="text" spellcheck="false">' +
-          '<p class="card-erro">Informe um endereço começando com https:// ou um texto válido.</p>' +
-          '<div class="card-editor-botoes">' +
-            '<button class="card-btn forte" type="button" data-acao="salvar">Salvar</button>' +
-            '<button class="card-btn" type="button" data-acao="cancelar">Cancelar</button>' +
-            '<button class="card-btn" type="button" data-acao="restaurar">Restaurar original</button>' +
-          '</div>';
-        editor.dataset.original = valor;
-        card.insertAdjacentElement('afterend', editor);
-
-        const campo = editor.querySelector('input');
-        editor.querySelector('.card-editor-alvo').textContent = titulo;
-
-        function fechar() {
-          editor.classList.remove('aberto');
-          editor.removeAttribute('data-erro');
-        }
-
-        function salvar() {
-          const novo = campo.value.trim();
-          const valido = card.dataset.tipo === 'link'
-            ? /^https?:\/\/\S+$/.test(novo)
-            : novo.length > 0;
-
-          if (!valido) {
-            editor.dataset.erro = 'sim';
-            campo.focus();
-            return;
-          }
-
-          card.dataset.valor = novo;
-          if (card.dataset.tipo === 'link') card.setAttribute('href', novo);
-          gravarLink(chave, novo);
-          fechar();
-          showToast('Link atualizado!');
-        }
-
-        editor.querySelector('[data-acao="salvar"]').addEventListener('click', salvar);
-        editor.querySelector('[data-acao="cancelar"]').addEventListener('click', fechar);
-        editor.querySelector('[data-acao="restaurar"]').addEventListener('click', () => {
-          campo.value = editor.dataset.original;
-          editor.removeAttribute('data-erro');
-          campo.focus();
-        });
-
-        campo.addEventListener('keydown', ev => {
-          ev.stopPropagation();
-          if (ev.key === 'Enter')  { ev.preventDefault(); salvar(); }
-          if (ev.key === 'Escape') { fechar(); }
-        });
-
-        card._abrirEditor = function () {
-          document.querySelectorAll('.card-editor.aberto').forEach(outro => {
-            if (outro !== editor) outro.classList.remove('aberto');
-          });
-          campo.value = card.dataset.valor;
-          editor.removeAttribute('data-erro');
-          editor.classList.add('aberto');
-          campo.focus();
-          campo.select();
-        };
-      });
-    })();
-
-    // Em modo edição, o clique no card abre o editor em vez da ação normal
+    // Cliques do quadro em modo edição
     document.addEventListener('click', e => {
       if (document.body.dataset.editmode !== 'on') return;
-      const card = e.target.closest('.col-body .card[data-chave]');
+
+      const adicionar = e.target.closest('.card-add');
+      if (adicionar) {
+        e.preventDefault(); e.stopPropagation();
+        novoCard(adicionar.dataset.col);
+        return;
+      }
+
+      if (e.target.closest('.card-editor')) return;
+
+      const card = e.target.closest('.col-body .card');
       if (!card) return;
+
       e.preventDefault();
       e.stopPropagation();
-      card._abrirEditor();
+
+      const colId  = card.dataset.col;
+      const indice = Number(card.dataset.indice);
+      const botao  = e.target.closest('.card-ctrl-btn');
+      const acao   = botao ? botao.dataset.acao : 'editar';
+
+      if (acao === 'subir')   moverCard(colId, indice, -1);
+      if (acao === 'descer')  moverCard(colId, indice, 1);
+      if (acao === 'excluir') excluirCard(colId, indice);
+      if (acao === 'editar')  abrirEditor(colId, indice);
     }, true);
 
+    document.getElementById('restaurarBtn').addEventListener('click', restaurarQuadro);
+
+    // ─── INICIALIZAÇÃO ───────────────────────────────
+    padrao = lerQuadroDoHTML();
+    const salvo = lerQuadroSalvo();
+    quadro = salvo && Object.keys(salvo).length ? salvo : JSON.parse(JSON.stringify(padrao));
+
+    // colunas novas do arquivo que ainda não existiam no que estava salvo
+    Object.keys(padrao).forEach(id => { if (!quadro[id]) quadro[id] = padrao[id]; });
+
+    renderQuadro();
   </script>
 
 </body>
