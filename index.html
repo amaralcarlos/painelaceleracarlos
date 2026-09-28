@@ -33,6 +33,10 @@
       --purple-dim: rgba(168,85,247,0.12);
       --purple-glow: rgba(168,85,247,0.25);
 
+      --cyan: #06b6d4;
+      --cyan-dim: rgba(6,182,212,0.12);
+      --cyan-glow: rgba(6,182,212,0.25);
+
       --red: #ef4444;
       --red-dim: rgba(239,68,68,0.12);
 
@@ -54,6 +58,7 @@
       --green-dim: rgba(16,185,129,0.08);
       --orange-dim: rgba(245,158,11,0.08);
       --purple-dim: rgba(168,85,247,0.08);
+      --cyan-dim: rgba(6,182,212,0.08);
       --red-dim: rgba(239,68,68,0.08);
     }
 
@@ -155,7 +160,7 @@
 
     /* ─── MAIN GRID ───────────────────────────────── */
     main {
-      max-width: 1400px;
+      max-width: 1680px;
       margin: 0 auto;
       padding: 32px 24px 0;
     }
@@ -172,12 +177,15 @@
 
     .board {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 20px;
       align-items: start;
     }
 
-    @media (max-width: 1200px) {
+    @media (max-width: 1400px) {
+      .board { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 960px) {
       .board { grid-template-columns: repeat(2, 1fr); }
     }
     @media (max-width: 640px) {
@@ -218,6 +226,7 @@
     .col-relatorios .col-icon   { background: var(--green-dim); }
     .col-pagamentos .col-icon   { background: var(--orange-dim); }
     .col-contratos  .col-icon   { background: var(--purple-dim); }
+    .col-mrr        .col-icon   { background: var(--cyan-dim); }
 
     .col-title {
       font-family: 'Syne', sans-serif;
@@ -230,6 +239,7 @@
     .col-relatorios .col-title   { color: var(--green); }
     .col-pagamentos .col-title   { color: var(--orange); }
     .col-contratos  .col-title   { color: var(--purple); }
+    .col-mrr        .col-title   { color: var(--cyan); }
 
     .col-count {
       margin-left: auto;
@@ -277,6 +287,7 @@
     .col-relatorios .card::before   { background: var(--green); }
     .col-pagamentos .card::before   { background: var(--orange); }
     .col-contratos  .card::before   { background: var(--purple); }
+    .col-mrr        .card::before   { background: var(--cyan); }
 
     .card:hover {
       background: var(--surface-3);
@@ -291,6 +302,8 @@
     .col-pagamentos  .card:hover::before { opacity: 1; }
     .col-contratos   .card:hover  { border-color: var(--purple); box-shadow: 0 4px 20px var(--purple-glow); }
     .col-contratos   .card:hover::before { opacity: 1; }
+    .col-mrr         .card:hover  { border-color: var(--cyan); box-shadow: 0 4px 20px var(--cyan-glow); }
+    .col-mrr         .card:hover::before { opacity: 1; }
 
     .card-title {
       font-family: 'Syne', sans-serif;
@@ -615,6 +628,7 @@
     .col:nth-child(2) { animation-delay: 0.1s; }
     .col:nth-child(3) { animation-delay: 0.15s; }
     .col:nth-child(4) { animation-delay: 0.2s; }
+    .col:nth-child(5) { animation-delay: 0.25s; }
 
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(16px); }
@@ -792,6 +806,72 @@
             <div class="card-title">Pro Anual Limite</div>
             <div class="card-info">R$24.000,00 à vista</div>
             <div class="card-info">12x R$2.397,00</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── PAGAMENTOS CARTÃO MRR ── -->
+      <div class="col col-mrr">
+        <div class="col-header">
+          <div class="col-icon">🔁</div>
+          <span class="col-title">Pagamentos Cartão MRR</span>
+          <span class="col-count">9</span>
+        </div>
+        <div class="col-body">
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/aogXMngRGd')">
+            <div class="card-title">R$ 2.000,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/7tGHlOfm1Y')">
+            <div class="card-title">R$ 2.500,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/xZR1Lmtw3J')">
+            <div class="card-title">R$ 2.997,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/GoE3eaP8If')">
+            <div class="card-title">R$ 2.700,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/uVt4C50Gzr')">
+            <div class="card-title">R$ 2.297,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/wtH4YVyVZl')">
+            <div class="card-title">R$ 3.597,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/uMTkccjmCY')">
+            <div class="card-title">R$ 3.200,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/liNZOKipXl')">
+            <div class="card-title">R$ 1.800,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
+            <div class="card-copy-hint">⎘ copiar link</div>
+          </div>
+
+          <div class="card" onclick="copyToClipboard('https://invoice.infinitepay.io/aceleraobra/4uAdvxXpCG')">
+            <div class="card-title">R$ 2.600,00</div>
+            <div class="card-info">Cobrança MRR no cartão</div>
             <div class="card-copy-hint">⎘ copiar link</div>
           </div>
 
